@@ -176,8 +176,6 @@ function SettingToggle({
 
 const styles = StyleSheet.create({
   content: {
-    flexDirection: "row",
-    flexWrap: "wrap",
     gap: theme.spacing.lg,
     marginHorizontal: "auto",
     maxWidth: 1180,
@@ -186,13 +184,16 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing.xl
   },
   contentWide: {
-    alignItems: "flex-start"
+    alignItems: "flex-start",
+    flexDirection: "row",
+    flexWrap: "wrap"
   },
   section: {
     backgroundColor: theme.colors.card,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.xl,
     borderWidth: 1,
+    width: "100%",
     gap: theme.spacing.md,
     padding: theme.spacing.lg
   },
@@ -200,34 +201,41 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md
   },
   sectionWide: {
-    minWidth: "48%"
+    minWidth: "48%",
+    width: "48%"
   },
   sectionTitle: {
     color: theme.colors.text,
+    flexShrink: 1,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 20
   },
   sectionText: {
     color: theme.colors.subtleText,
+    flexShrink: 1,
     fontFamily: theme.fonts.body,
     fontSize: 15,
     lineHeight: 22
   },
   toggleRow: {
-    alignItems: "center",
+    alignItems: "flex-start",
     backgroundColor: theme.colors.cardMuted,
     borderRadius: theme.radius.lg,
     flexDirection: "row",
     justifyContent: "space-between",
+    minWidth: 0,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.md
   },
   toggleLabel: {
     color: theme.colors.text,
     flex: 1,
+    flexShrink: 1,
     fontFamily: theme.fonts.body,
     fontSize: 15,
-    marginRight: theme.spacing.md
+    lineHeight: 21,
+    marginRight: theme.spacing.md,
+    minWidth: 0
   },
   resetButton: {
     color: theme.colors.warning,
