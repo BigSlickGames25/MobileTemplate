@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.lg,
     marginHorizontal: "auto",
     maxWidth: 1180,
-    paddingBottom: theme.spacing.xxxl,
+    paddingBottom: theme.spacing.xxxl + 96,
     paddingHorizontal: theme.spacing.lg,
     paddingTop: theme.spacing.xl
   },

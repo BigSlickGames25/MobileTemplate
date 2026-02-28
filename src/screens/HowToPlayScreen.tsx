@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.lg,
     marginHorizontal: "auto",
     maxWidth: 1180,
-    paddingBottom: theme.spacing.xxxl,
+    paddingBottom: theme.spacing.xxxl + 96,
     paddingHorizontal: theme.spacing.lg,
     paddingTop: theme.spacing.xl
   },
@@ -87,13 +87,15 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.xl,
     borderWidth: 1,
     gap: theme.spacing.sm,
-    padding: theme.spacing.lg
+    padding: theme.spacing.lg,
+    width: "100%"
   },
   cardCompact: {
     padding: theme.spacing.md
   },
   cardWide: {
-    minWidth: "48%"
+    minWidth: "48%",
+    width: "48%"
   },
   cardTitle: {
     color: theme.colors.text,

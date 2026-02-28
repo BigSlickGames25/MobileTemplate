@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { fireHaptic } from "../../src/services/haptics";
@@ -10,7 +10,8 @@ import { theme } from "../../src/theme";
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const { settings } = useGameSettings();
-  const tabBarHeight = Math.max(68, 60 + insets.bottom);
+  const tabBarBottomPadding = Math.max(insets.bottom, 12);
+  const tabBarHeight = 74 + tabBarBottomPadding;
 
   return (
     <Tabs
@@ -22,14 +23,14 @@ export default function TabsLayout() {
         tabBarActiveTintColor: theme.colors.surface,
         tabBarHideOnKeyboard: true,
         tabBarInactiveTintColor: theme.colors.subtleText,
+        tabBarShowLabel: false,
         tabBarItemStyle: styles.tabBarItem,
-        tabBarLabelStyle: styles.tabBarLabel,
         tabBarStyle: [
           styles.tabBar,
           {
             height: tabBarHeight,
-            paddingBottom: Math.max(insets.bottom, 10),
-            paddingTop: 10
+            paddingBottom: tabBarBottomPadding,
+            paddingTop: 8
           }
         ]
       }}
@@ -44,10 +45,11 @@ export default function TabsLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons
+            <TabItemVisual
               color={color}
-              name={focused ? "view-grid" : "view-grid-outline"}
-              size={focused ? 24 : 22}
+              focused={focused}
+              icon={focused ? "view-grid" : "view-grid-outline"}
+              label="Home"
             />
           )
         }}
@@ -62,10 +64,11 @@ export default function TabsLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons
+            <TabItemVisual
               color={color}
-              name={focused ? "tune-variant" : "tune"}
-              size={focused ? 24 : 22}
+              focused={focused}
+              icon={focused ? "tune-variant" : "tune"}
+              label="Settings"
             />
           )
         }}
@@ -80,15 +83,44 @@ export default function TabsLayout() {
         options={{
           title: "Guide",
           tabBarIcon: ({ color, focused }) => (
-            <MaterialCommunityIcons
+            <TabItemVisual
               color={color}
-              name={focused ? "controller-classic" : "controller-classic-outline"}
-              size={focused ? 24 : 22}
+              focused={focused}
+              icon={
+                focused
+                  ? "controller-classic"
+                  : "controller-classic-outline"
+              }
+              label="Guide"
             />
           )
         }}
       />
     </Tabs>
+  );
+}
+
+function TabItemVisual({
+  color,
+  focused,
+  icon,
+  label
+}: {
+  color: string;
+  focused: boolean;
+  icon: React.ComponentProps<typeof MaterialCommunityIcons>["name"];
+  label: string;
+}) {
+  return (
+    <View style={styles.tabVisual}>
+      <MaterialCommunityIcons color={color} name={icon} size={focused ? 24 : 22} />
+      <Text
+        numberOfLines={1}
+        style={[styles.tabLabelText, { color }]}
+      >
+        {label}
+      </Text>
+    </View>
   );
 }
 
@@ -101,12 +133,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.sm
   },
   tabBarItem: {
-    paddingVertical: 2
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 0
   },
-  tabBarLabel: {
+  tabVisual: {
+    alignItems: "center",
+    gap: 2,
+    justifyContent: "center",
+    minWidth: 64
+  },
+  tabLabelText: {
     fontFamily: theme.fonts.label,
-    fontSize: 11,
-    letterSpacing: 0.4,
-    paddingBottom: 1
+    fontSize: 10,
+    letterSpacing: 0.3,
+    lineHeight: 12,
+    textAlign: "center"
   }
 });
