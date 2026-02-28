@@ -58,14 +58,15 @@ const styles = StyleSheet.create({
   },
   label: {
     color: theme.colors.text,
+    flexShrink: 1,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 18
   },
   subtitle: {
     color: theme.colors.subtleText,
+    flexShrink: 1,
     fontFamily: theme.fonts.body,
     fontSize: 14,
     lineHeight: 20
   }
 });
-

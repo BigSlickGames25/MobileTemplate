@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   option: {
     backgroundColor: theme.colors.cardMuted,
     borderRadius: 999,
-    minWidth: 96,
+    minWidth: 0,
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm
   },
@@ -55,9 +55,9 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     color: theme.colors.text,
+    flexShrink: 1,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 14,
     textAlign: "center"
   }
 });
-

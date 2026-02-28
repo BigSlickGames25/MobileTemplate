@@ -7,12 +7,14 @@ import { GameButton } from "../src/components/ui/GameButton";
 import { useDeviceProfile } from "../src/hooks/useDeviceProfile";
 import { fireHaptic } from "../src/services/haptics";
 import { useGameSettings } from "../src/store/game-settings";
-import { theme } from "../src/theme";
+import { clamp, theme } from "../src/theme";
 
 export default function HomeScreen() {
   const device = useDeviceProfile();
   const { settings } = useGameSettings();
   const isWide = device.isLandscape || device.width >= 860;
+  const isCompact = device.width < 390;
+  const titleFontSize = Math.round(clamp(34 * device.textScale, 28, 38));
 
   function goToGame() {
     void fireHaptic(settings.haptics, "confirm");
@@ -37,9 +39,23 @@ export default function HomeScreen() {
       contentContainerStyle={[styles.content, isWide && styles.contentWide]}
     >
       <View style={[styles.topRow, isWide && styles.topRowWide]}>
-        <View style={[styles.heroCard, isWide && styles.splitPanel]}>
+        <View
+          style={[
+            styles.heroCard,
+            isWide && styles.splitPanel,
+            isCompact && styles.compactCard
+          ]}
+        >
           <Text style={styles.kicker}>Reusable Mobile Starter</Text>
-          <Text style={styles.title}>
+          <Text
+            style={[
+              styles.title,
+              {
+                fontSize: titleFontSize,
+                lineHeight: titleFontSize + 4
+              }
+            ]}
+          >
             Ship-ready shell for touch-first games.
           </Text>
           <Text style={styles.description}>
@@ -50,7 +66,13 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-        <View style={[styles.notesCard, isWide && styles.splitPanel]}>
+        <View
+          style={[
+            styles.notesCard,
+            isWide && styles.splitPanel,
+            isCompact && styles.compactCard
+          ]}
+        >
           <Text style={styles.notesTitle}>Template Intent</Text>
           <Text style={styles.notesText}>
             Replace the sample entities inside the game world layer, keep the
@@ -71,11 +93,13 @@ export default function HomeScreen() {
       <View style={[styles.bottomRow, isWide && styles.bottomRowWide]}>
         <View style={[styles.featureGrid, isWide && styles.bottomPanel]}>
           <FeatureChip
+            compact={isCompact}
             label="Safe Areas"
             value="Top notch + home indicator aware"
             wide={isWide}
           />
           <FeatureChip
+            compact={isCompact}
             label="Orientation"
             value={
               settings.orientation === "adaptive"
@@ -87,6 +111,7 @@ export default function HomeScreen() {
             wide={isWide}
           />
           <FeatureChip
+            compact={isCompact}
             label="Input"
             value={
               settings.handPreference === "left"
@@ -96,6 +121,7 @@ export default function HomeScreen() {
             wide={isWide}
           />
           <FeatureChip
+            compact={isCompact}
             label="Feedback"
             value={`Haptics ${settings.haptics}`}
             wide={isWide}
@@ -126,16 +152,24 @@ export default function HomeScreen() {
 }
 
 function FeatureChip({
+  compact,
   label,
   value,
   wide
 }: {
+  compact?: boolean;
   label: string;
   value: string;
   wide?: boolean;
 }) {
   return (
-    <View style={[styles.featureChip, wide && styles.featureChipWide]}>
+    <View
+      style={[
+        styles.featureChip,
+        wide && styles.featureChipWide,
+        compact && styles.featureChipCompact
+      ]}
+    >
       <Text style={styles.featureLabel}>{label}</Text>
       <Text style={styles.featureValue}>{value}</Text>
     </View>
@@ -181,6 +215,9 @@ const styles = StyleSheet.create({
     gap: theme.spacing.md,
     padding: theme.spacing.xl
   },
+  compactCard: {
+    padding: theme.spacing.lg
+  },
   kicker: {
     color: theme.colors.accent,
     fontFamily: theme.fonts.label,
@@ -190,12 +227,14 @@ const styles = StyleSheet.create({
   },
   title: {
     color: theme.colors.text,
+    flexShrink: 1,
     fontFamily: theme.fonts.display,
     fontSize: 34,
     lineHeight: 38
   },
   description: {
     color: theme.colors.subtleText,
+    flexShrink: 1,
     fontFamily: theme.fonts.body,
     fontSize: 16,
     lineHeight: 24
@@ -214,6 +253,9 @@ const styles = StyleSheet.create({
   },
   featureChipWide: {
     minWidth: "31%"
+  },
+  featureChipCompact: {
+    minWidth: "100%"
   },
   featureLabel: {
     color: theme.colors.subtleText,
@@ -243,6 +285,7 @@ const styles = StyleSheet.create({
   },
   notesText: {
     color: theme.colors.subtleText,
+    flexShrink: 1,
     fontFamily: theme.fonts.body,
     fontSize: 15,
     lineHeight: 23

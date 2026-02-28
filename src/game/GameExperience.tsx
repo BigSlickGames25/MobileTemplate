@@ -3,6 +3,7 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import { useEffect, useRef, useState } from "react";
 import {
   LayoutChangeEvent,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -54,6 +55,51 @@ export function GameExperience() {
       void deactivateKeepAwake("game-session");
     };
   }, [settings.keepAwake]);
+
+  useEffect(() => {
+    if (Platform.OS !== "web") {
+      return;
+    }
+
+    const { body, documentElement } = document;
+    const previousHtmlOverflow = documentElement.style.overflow;
+    const previousHtmlOverscroll = documentElement.style.overscrollBehavior;
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyOverscroll = body.style.overscrollBehavior;
+    const previousBodyTouchAction = body.style.touchAction;
+    const previousBodyPosition = body.style.position;
+    const previousBodyInset = body.style.inset;
+    const previousBodyWidth = body.style.width;
+
+    const preventTouchDefault = (event: Event) => {
+      event.preventDefault();
+    };
+
+    documentElement.style.overflow = "hidden";
+    documentElement.style.overscrollBehavior = "none";
+    body.style.overflow = "hidden";
+    body.style.overscrollBehavior = "none";
+    body.style.touchAction = "none";
+    body.style.position = "fixed";
+    body.style.inset = "0";
+    body.style.width = "100%";
+    window.scrollTo(0, 0);
+    document.addEventListener("touchmove", preventTouchDefault, {
+      passive: false
+    });
+
+    return () => {
+      documentElement.style.overflow = previousHtmlOverflow;
+      documentElement.style.overscrollBehavior = previousHtmlOverscroll;
+      body.style.overflow = previousBodyOverflow;
+      body.style.overscrollBehavior = previousBodyOverscroll;
+      body.style.touchAction = previousBodyTouchAction;
+      body.style.position = previousBodyPosition;
+      body.style.inset = previousBodyInset;
+      body.style.width = previousBodyWidth;
+      document.removeEventListener("touchmove", preventTouchDefault);
+    };
+  }, []);
 
   useEffect(() => {
     if (!arenaSize.width || !arenaSize.height) {
@@ -368,10 +414,14 @@ function Arena({ world }: { world: GameWorld }) {
 const styles = StyleSheet.create({
   root: {
     backgroundColor: theme.colors.background,
-    flex: 1
+    flex: 1,
+    overflow: "hidden",
+    overscrollBehavior: "none",
+    touchAction: "none"
   },
   safeArea: {
     flex: 1,
+    overflow: "hidden",
     paddingHorizontal: theme.spacing.md
   },
   gameShell: {
@@ -433,6 +483,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flex: 1,
     overflow: "hidden",
+    overscrollBehavior: "none",
     position: "relative"
   },
   arenaShellLandscape: {
