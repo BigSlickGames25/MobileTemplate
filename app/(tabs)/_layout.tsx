@@ -1,17 +1,20 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useDeviceProfile } from "../../src/hooks/useDeviceProfile";
 import { fireHaptic } from "../../src/services/haptics";
 import { useGameSettings } from "../../src/store/game-settings";
 import { theme } from "../../src/theme";
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const device = useDeviceProfile();
   const { settings } = useGameSettings();
+  const isCompact = device.width < 390;
   const tabBarBottomPadding = Math.max(insets.bottom, 12);
-  const tabBarHeight = 74 + tabBarBottomPadding;
+  const tabBarHeight = (isCompact ? 78 : 82) + tabBarBottomPadding;
 
   return (
     <Tabs
@@ -23,14 +26,20 @@ export default function TabsLayout() {
         tabBarActiveTintColor: theme.colors.surface,
         tabBarHideOnKeyboard: true,
         tabBarInactiveTintColor: theme.colors.subtleText,
-        tabBarShowLabel: false,
+        tabBarAllowFontScaling: false,
+        tabBarIconStyle: styles.tabBarIcon,
         tabBarItemStyle: styles.tabBarItem,
+        tabBarLabelPosition: "below-icon",
+        tabBarLabelStyle: [
+          styles.tabBarLabel,
+          isCompact && styles.tabBarLabelCompact
+        ],
         tabBarStyle: [
           styles.tabBar,
           {
             height: tabBarHeight,
             paddingBottom: tabBarBottomPadding,
-            paddingTop: 8
+            paddingTop: isCompact ? 6 : 8
           }
         ]
       }}
@@ -45,11 +54,10 @@ export default function TabsLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, focused }) => (
-            <TabItemVisual
+            <MaterialCommunityIcons
               color={color}
-              focused={focused}
-              icon={focused ? "view-grid" : "view-grid-outline"}
-              label="Home"
+              name={focused ? "view-grid" : "view-grid-outline"}
+              size={focused ? 24 : 22}
             />
           )
         }}
@@ -64,11 +72,10 @@ export default function TabsLayout() {
         options={{
           title: "Settings",
           tabBarIcon: ({ color, focused }) => (
-            <TabItemVisual
+            <MaterialCommunityIcons
               color={color}
-              focused={focused}
-              icon={focused ? "tune-variant" : "tune"}
-              label="Settings"
+              name={focused ? "tune-variant" : "tune"}
+              size={focused ? 24 : 22}
             />
           )
         }}
@@ -83,44 +90,19 @@ export default function TabsLayout() {
         options={{
           title: "Guide",
           tabBarIcon: ({ color, focused }) => (
-            <TabItemVisual
+            <MaterialCommunityIcons
               color={color}
-              focused={focused}
-              icon={
+              name={
                 focused
                   ? "controller-classic"
                   : "controller-classic-outline"
               }
-              label="Guide"
+              size={focused ? 24 : 22}
             />
           )
         }}
       />
     </Tabs>
-  );
-}
-
-function TabItemVisual({
-  color,
-  focused,
-  icon,
-  label
-}: {
-  color: string;
-  focused: boolean;
-  icon: React.ComponentProps<typeof MaterialCommunityIcons>["name"];
-  label: string;
-}) {
-  return (
-    <View style={styles.tabVisual}>
-      <MaterialCommunityIcons color={color} name={icon} size={focused ? 24 : 22} />
-      <Text
-        numberOfLines={1}
-        style={[styles.tabLabelText, { color }]}
-      >
-        {label}
-      </Text>
-    </View>
   );
 }
 
@@ -132,22 +114,25 @@ const styles = StyleSheet.create({
     elevation: 0,
     paddingHorizontal: theme.spacing.sm
   },
+  tabBarIcon: {
+    marginBottom: 2,
+    marginTop: 2
+  },
   tabBarItem: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 0
+    paddingVertical: 2
   },
-  tabVisual: {
-    alignItems: "center",
-    gap: 2,
-    justifyContent: "center",
-    minWidth: 64
-  },
-  tabLabelText: {
+  tabBarLabel: {
     fontFamily: theme.fonts.label,
     fontSize: 10,
     letterSpacing: 0.3,
     lineHeight: 12,
+    paddingBottom: 0,
     textAlign: "center"
+  },
+  tabBarLabelCompact: {
+    fontSize: 9,
+    lineHeight: 11
   }
 });
