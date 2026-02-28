@@ -1,15 +1,15 @@
-import { router } from "expo-router";
+import { Href, router } from "expo-router";
 import { startTransition } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { ScreenContainer } from "../src/components/layout/ScreenContainer";
-import { GameButton } from "../src/components/ui/GameButton";
-import { useDeviceProfile } from "../src/hooks/useDeviceProfile";
-import { fireHaptic } from "../src/services/haptics";
-import { useGameSettings } from "../src/store/game-settings";
-import { clamp, theme } from "../src/theme";
+import { ScreenContainer } from "../components/layout/ScreenContainer";
+import { GameButton } from "../components/ui/GameButton";
+import { useDeviceProfile } from "../hooks/useDeviceProfile";
+import { fireHaptic } from "../services/haptics";
+import { useGameSettings } from "../store/game-settings";
+import { clamp, theme } from "../theme";
 
-export default function HomeScreen() {
+export function HomeScreen() {
   const device = useDeviceProfile();
   const { settings } = useGameSettings();
   const isWide = device.isLandscape || device.width >= 860;
@@ -19,18 +19,18 @@ export default function HomeScreen() {
   function goToGame() {
     void fireHaptic(settings.haptics, "confirm");
     startTransition(() => {
-      router.push("/game");
+      router.push("/game" as Href);
     });
   }
 
   function goToSettings() {
     void fireHaptic(settings.haptics, "tap");
-    router.push("/settings");
+    router.navigate("/settings" as Href);
   }
 
   function goToHowToPlay() {
     void fireHaptic(settings.haptics, "tap");
-    router.push("/how-to-play");
+    router.navigate("/how-to-play" as Href);
   }
 
   return (

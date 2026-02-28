@@ -26,25 +26,10 @@ export default function RootLayout() {
           gestureEnabled: true
         }}
       >
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="game" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
-          name="settings"
-          options={{
-            presentation: "modal",
-            title: "Settings",
-            headerShown: true,
-            headerLargeTitle: true
-          }}
-        />
-        <Stack.Screen
-          name="how-to-play"
-          options={{
-            presentation: "modal",
-            title: "How To Play",
-            headerShown: true,
-            headerLargeTitle: true
-          }}
+          name="game"
+          options={{ gestureEnabled: false, headerShown: false }}
         />
       </Stack>
     </AppProviders>

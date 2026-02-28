@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { Href, router } from "expo-router";
 import { activateKeepAwakeAsync, deactivateKeepAwake } from "expo-keep-awake";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -196,7 +196,7 @@ export function GameExperience() {
 
   function leaveGame() {
     void fireHaptic(settings.haptics, "tap");
-    router.replace("/");
+    router.replace("/" as Href);
   }
 
   function renderJoystick() {

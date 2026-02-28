@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { ScreenContainer } from "../src/components/layout/ScreenContainer";
-import { useDeviceProfile } from "../src/hooks/useDeviceProfile";
-import { theme } from "../src/theme";
+import { ScreenContainer } from "../components/layout/ScreenContainer";
+import { useDeviceProfile } from "../hooks/useDeviceProfile";
+import { theme } from "../theme";
 
-export default function HowToPlayScreen() {
+export function HowToPlayScreen() {
   const device = useDeviceProfile();
   const isWide = device.isLandscape || device.width >= 860;
   const isCompact = device.width < 390;

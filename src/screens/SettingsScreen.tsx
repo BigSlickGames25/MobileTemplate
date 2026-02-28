@@ -1,16 +1,16 @@
 import { StyleSheet, Switch, Text, View } from "react-native";
 
-import { ScreenContainer } from "../src/components/layout/ScreenContainer";
-import { OptionGroup } from "../src/components/ui/OptionGroup";
-import { useDeviceProfile } from "../src/hooks/useDeviceProfile";
-import { useGameSettings } from "../src/store/game-settings";
+import { ScreenContainer } from "../components/layout/ScreenContainer";
+import { OptionGroup } from "../components/ui/OptionGroup";
+import { useDeviceProfile } from "../hooks/useDeviceProfile";
+import { useGameSettings } from "../store/game-settings";
 import {
   GameSettings,
   HandPreference,
   HapticsLevel,
   OrientationPreference
-} from "../src/types/settings";
-import { theme } from "../src/theme";
+} from "../types/settings";
+import { theme } from "../theme";
 
 const orientationOptions: { label: string; value: OrientationPreference }[] = [
   { label: "Adaptive", value: "adaptive" },
@@ -29,7 +29,7 @@ const handOptions: { label: string; value: HandPreference }[] = [
   { label: "Right", value: "right" }
 ];
 
-export default function SettingsScreen() {
+export function SettingsScreen() {
   const device = useDeviceProfile();
   const { settings, resetSettings, updateSetting } = useGameSettings();
   const isWide = device.isLandscape || device.width >= 860;
@@ -193,9 +193,9 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     borderRadius: theme.radius.xl,
     borderWidth: 1,
-    width: "100%",
     gap: theme.spacing.md,
-    padding: theme.spacing.lg
+    padding: theme.spacing.lg,
+    width: "100%"
   },
   sectionCompact: {
     padding: theme.spacing.md
