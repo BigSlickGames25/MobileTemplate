@@ -24,6 +24,7 @@ import { createWorld, resizeWorld, updateWorld } from "./world";
 export function GameExperience() {
   const device = useDeviceProfile();
   const { settings } = useGameSettings();
+  const isLandscape = device.isLandscape;
   const [arenaSize, setArenaSize] = useState({ width: 0, height: 0 });
   const [world, setWorld] = useState<GameWorld | null>(null);
   const [paused, setPaused] = useState(false);
@@ -36,10 +37,10 @@ export function GameExperience() {
   });
 
   const joystickSize = Math.round(
-    clamp((device.isLandscape ? 118 : 152) * device.controlScale, 108, 176)
+    clamp((isLandscape ? 118 : 152) * device.controlScale, 108, 176)
   );
   const pulseSize = Math.round(
-    clamp((device.isLandscape ? 88 : 108) * device.controlScale, 84, 132)
+    clamp((isLandscape ? 88 : 108) * device.controlScale, 84, 132)
   );
 
   useEffect(() => {
@@ -152,130 +153,165 @@ export function GameExperience() {
     router.replace("/");
   }
 
+  function renderJoystick() {
+    return (
+      <VirtualJoystick
+        label="Movement"
+        onChange={(move) => {
+          inputRef.current = {
+            ...inputRef.current,
+            move
+          };
+        }}
+        onEngage={() => {
+          void fireHaptic(settings.haptics, "tap");
+        }}
+        showGuide={settings.showTouchGuide}
+        size={joystickSize}
+      />
+    );
+  }
+
+  function renderActionButtons() {
+    return (
+      <ActionButtons
+        boostActive={boostActive}
+        handPreference={settings.handPreference}
+        onBoostChange={(value) => {
+          setBoostActive(value);
+          inputRef.current = {
+            ...inputRef.current,
+            boost: value
+          };
+        }}
+        onPulse={handlePulse}
+        showGuide={settings.showTouchGuide}
+        size={pulseSize}
+      />
+    );
+  }
+
+  const leftControl =
+    settings.handPreference === "left" ? renderActionButtons() : renderJoystick();
+  const rightControl =
+    settings.handPreference === "left" ? renderJoystick() : renderActionButtons();
+
   return (
     <View style={styles.root}>
       <AppBackdrop />
-      <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
-        <View style={styles.header}>
-          <View style={styles.metricBlock}>
-            <Text style={styles.metricLabel}>Score</Text>
-            <Text style={styles.metricValue}>{world?.score ?? 0}</Text>
-          </View>
-          <View style={styles.metricBlock}>
-            <Text style={styles.metricLabel}>Best</Text>
-            <Text style={styles.metricValue}>{bestScore}</Text>
-          </View>
-          <View style={styles.metricBlock}>
-            <Text style={styles.metricLabel}>Health</Text>
-            <Text style={styles.metricValue}>{world?.player.health ?? 0}</Text>
-          </View>
-          <Pressable
-            onPress={handlePauseToggle}
-            style={({ pressed }) => [
-              styles.pauseButton,
-              pressed && styles.pauseButtonPressed
-            ]}
-          >
-            <Text style={styles.pauseLabel}>{paused ? "Resume" : "Pause"}</Text>
-          </Pressable>
-        </View>
-
-        <View onLayout={handleArenaLayout} style={styles.arenaShell}>
-          {world ? <Arena world={world} /> : null}
-
-          {paused || world?.gameOver ? (
-            <View style={styles.overlay}>
-              <Text style={styles.overlayTitle}>
-                {world?.gameOver ? "Run Over" : "Paused"}
+      <SafeAreaView
+        edges={["top", "bottom", "left", "right"]}
+        style={styles.safeArea}
+      >
+        <View style={[styles.gameShell, isLandscape && styles.gameShellLandscape]}>
+          <View style={[styles.header, isLandscape && styles.headerLandscape]}>
+            <View style={styles.metricBlock}>
+              <Text style={styles.metricLabel}>Score</Text>
+              <Text style={styles.metricValue}>{world?.score ?? 0}</Text>
+            </View>
+            <View style={styles.metricBlock}>
+              <Text style={styles.metricLabel}>Best</Text>
+              <Text style={styles.metricValue}>{bestScore}</Text>
+            </View>
+            <View style={styles.metricBlock}>
+              <Text style={styles.metricLabel}>Health</Text>
+              <Text style={styles.metricValue}>{world?.player.health ?? 0}</Text>
+            </View>
+            <Pressable
+              onPress={handlePauseToggle}
+              style={({ pressed }) => [
+                styles.pauseButton,
+                pressed && styles.pauseButtonPressed
+              ]}
+            >
+              <Text style={styles.pauseLabel}>
+                {paused ? "Resume" : "Pause"}
               </Text>
-              <Text style={styles.overlayText}>
-                {world?.gameOver
-                  ? "Restart the loop or head back to the menu shell."
-                  : "The session is frozen. Resume when you are ready."}
-              </Text>
-              <View style={styles.overlayButtons}>
-                <Pressable onPress={handleRestart} style={styles.overlayPrimary}>
-                  <Text style={styles.overlayPrimaryText}>Restart</Text>
-                </Pressable>
-                <Pressable onPress={leaveGame} style={styles.overlaySecondary}>
-                  <Text style={styles.overlaySecondaryText}>Menu</Text>
-                </Pressable>
+            </Pressable>
+          </View>
+
+          {isLandscape ? (
+            <View style={styles.landscapeSession}>
+              <View style={[styles.landscapeRail, styles.landscapeRailLeft]}>
+                {leftControl}
+              </View>
+              <View style={styles.landscapeCenterColumn}>
+                <View
+                  onLayout={handleArenaLayout}
+                  style={[styles.arenaShell, styles.arenaShellLandscape]}
+                >
+                  {world ? <Arena world={world} /> : null}
+
+                  {paused || world?.gameOver ? (
+                    <GameOverlay
+                      onLeave={leaveGame}
+                      onRestart={handleRestart}
+                      paused={paused}
+                      world={world}
+                    />
+                  ) : null}
+                </View>
+              </View>
+              <View style={[styles.landscapeRail, styles.landscapeRailRight]}>
+                {rightControl}
               </View>
             </View>
-          ) : null}
-        </View>
-
-        <View
-          style={[
-            styles.controlsRow,
-            device.isLandscape && styles.controlsRowLandscape
-          ]}
-        >
-          {settings.handPreference === "left" ? (
-            <>
-              <ActionButtons
-                boostActive={boostActive}
-                handPreference={settings.handPreference}
-                onBoostChange={(value) => {
-                  setBoostActive(value);
-                  inputRef.current = {
-                    ...inputRef.current,
-                    boost: value
-                  };
-                }}
-                onPulse={handlePulse}
-                showGuide={settings.showTouchGuide}
-                size={pulseSize}
-              />
-              <VirtualJoystick
-                label="Movement"
-                onChange={(move) => {
-                  inputRef.current = {
-                    ...inputRef.current,
-                    move
-                  };
-                }}
-                onEngage={() => {
-                  void fireHaptic(settings.haptics, "tap");
-                }}
-                showGuide={settings.showTouchGuide}
-                size={joystickSize}
-              />
-            </>
           ) : (
             <>
-              <VirtualJoystick
-                label="Movement"
-                onChange={(move) => {
-                  inputRef.current = {
-                    ...inputRef.current,
-                    move
-                  };
-                }}
-                onEngage={() => {
-                  void fireHaptic(settings.haptics, "tap");
-                }}
-                showGuide={settings.showTouchGuide}
-                size={joystickSize}
-              />
-              <ActionButtons
-                boostActive={boostActive}
-                handPreference={settings.handPreference}
-                onBoostChange={(value) => {
-                  setBoostActive(value);
-                  inputRef.current = {
-                    ...inputRef.current,
-                    boost: value
-                  };
-                }}
-                onPulse={handlePulse}
-                showGuide={settings.showTouchGuide}
-                size={pulseSize}
-              />
+              <View onLayout={handleArenaLayout} style={styles.arenaShell}>
+                {world ? <Arena world={world} /> : null}
+
+                {paused || world?.gameOver ? (
+                  <GameOverlay
+                    onLeave={leaveGame}
+                    onRestart={handleRestart}
+                    paused={paused}
+                    world={world}
+                  />
+                ) : null}
+              </View>
+
+              <View style={styles.controlsRow}>
+                {leftControl}
+                {rightControl}
+              </View>
             </>
           )}
         </View>
       </SafeAreaView>
+    </View>
+  );
+}
+
+function GameOverlay({
+  onLeave,
+  onRestart,
+  paused,
+  world
+}: {
+  onLeave: () => void;
+  onRestart: () => void;
+  paused: boolean;
+  world: GameWorld | null;
+}) {
+  return (
+    <View style={styles.overlay}>
+      <Text style={styles.overlayTitle}>
+        {world?.gameOver ? "Run Over" : "Paused"}
+      </Text>
+      <Text style={styles.overlayText}>
+        {world?.gameOver
+          ? "Restart the loop or head back to the menu shell."
+          : "The session is frozen. Resume when you are ready."}
+      </Text>
+      <View style={styles.overlayButtons}>
+        <Pressable onPress={onRestart} style={styles.overlayPrimary}>
+          <Text style={styles.overlayPrimaryText}>Restart</Text>
+        </Pressable>
+        <Pressable onPress={onLeave} style={styles.overlaySecondary}>
+          <Text style={styles.overlaySecondaryText}>Menu</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -338,6 +374,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: theme.spacing.md
   },
+  gameShell: {
+    flex: 1,
+    gap: theme.spacing.md
+  },
+  gameShellLandscape: {
+    gap: theme.spacing.sm
+  },
   header: {
     alignItems: "center",
     flexDirection: "row",
@@ -346,6 +389,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingBottom: theme.spacing.md,
     paddingTop: theme.spacing.sm
+  },
+  headerLandscape: {
+    paddingBottom: theme.spacing.sm
   },
   metricBlock: {
     backgroundColor: theme.colors.card,
@@ -388,6 +434,9 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: "hidden",
     position: "relative"
+  },
+  arenaShellLandscape: {
+    minHeight: 0
   },
   arena: {
     flex: 1
@@ -462,7 +511,26 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.sm,
     paddingTop: theme.spacing.md
   },
-  controlsRowLandscape: {
-    paddingTop: theme.spacing.sm
+  landscapeSession: {
+    alignItems: "stretch",
+    flex: 1,
+    flexDirection: "row",
+    gap: theme.spacing.md,
+    minHeight: 0
+  },
+  landscapeCenterColumn: {
+    flex: 1,
+    minHeight: 0
+  },
+  landscapeRail: {
+    justifyContent: "center",
+    paddingBottom: theme.spacing.sm,
+    width: 188
+  },
+  landscapeRailLeft: {
+    alignItems: "flex-start"
+  },
+  landscapeRailRight: {
+    alignItems: "flex-end"
   }
 });

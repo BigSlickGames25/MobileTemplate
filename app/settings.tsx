@@ -2,6 +2,7 @@ import { StyleSheet, Switch, Text, View } from "react-native";
 
 import { ScreenContainer } from "../src/components/layout/ScreenContainer";
 import { OptionGroup } from "../src/components/ui/OptionGroup";
+import { useDeviceProfile } from "../src/hooks/useDeviceProfile";
 import { useGameSettings } from "../src/store/game-settings";
 import {
   GameSettings,
@@ -29,11 +30,16 @@ const handOptions: { label: string; value: HandPreference }[] = [
 ];
 
 export default function SettingsScreen() {
+  const device = useDeviceProfile();
   const { settings, resetSettings, updateSetting } = useGameSettings();
+  const isWide = device.isLandscape || device.width >= 860;
 
   return (
-    <ScreenContainer scroll contentContainerStyle={styles.content}>
-      <View style={styles.section}>
+    <ScreenContainer
+      scroll
+      contentContainerStyle={[styles.content, isWide && styles.contentWide]}
+    >
+      <View style={[styles.section, isWide && styles.sectionWide]}>
         <Text style={styles.sectionTitle}>Device posture</Text>
         <Text style={styles.sectionText}>
           Rotation is applied app-wide so the game shell and menus stay
@@ -48,7 +54,7 @@ export default function SettingsScreen() {
         />
       </View>
 
-      <View style={styles.section}>
+      <View style={[styles.section, isWide && styles.sectionWide]}>
         <Text style={styles.sectionTitle}>Feedback</Text>
         <Text style={styles.sectionText}>
           Tune system haptics for menus, pickups, hits, and state changes.
@@ -62,7 +68,7 @@ export default function SettingsScreen() {
         />
       </View>
 
-      <View style={styles.section}>
+      <View style={[styles.section, isWide && styles.sectionWide]}>
         <Text style={styles.sectionTitle}>Touch layout</Text>
         <Text style={styles.sectionText}>
           Swap the joystick and action cluster for left-handed or right-handed
@@ -80,7 +86,7 @@ export default function SettingsScreen() {
         />
       </View>
 
-      <View style={styles.section}>
+      <View style={[styles.section, isWide && styles.sectionWide]}>
         <Text style={styles.sectionTitle}>Runtime options</Text>
         <SettingToggle
           label="Keep screen awake during gameplay"
@@ -99,7 +105,7 @@ export default function SettingsScreen() {
         />
       </View>
 
-      <View style={styles.section}>
+      <View style={[styles.section, isWide && styles.sectionWide]}>
         <Text style={styles.sectionTitle}>Reset</Text>
         <Text style={styles.sectionText}>
           Restore template defaults before you branch this into a specific game.
@@ -139,10 +145,17 @@ function SettingToggle({
 
 const styles = StyleSheet.create({
   content: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: theme.spacing.lg,
+    marginHorizontal: "auto",
+    maxWidth: 1180,
     paddingBottom: theme.spacing.xxxl,
     paddingHorizontal: theme.spacing.lg,
     paddingTop: theme.spacing.xl
+  },
+  contentWide: {
+    alignItems: "flex-start"
   },
   section: {
     backgroundColor: theme.colors.card,
@@ -151,6 +164,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     gap: theme.spacing.md,
     padding: theme.spacing.lg
+  },
+  sectionWide: {
+    minWidth: "48%"
   },
   sectionTitle: {
     color: theme.colors.text,
@@ -185,4 +201,3 @@ const styles = StyleSheet.create({
     fontSize: 15
   }
 });
-

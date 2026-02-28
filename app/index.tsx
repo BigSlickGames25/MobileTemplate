@@ -4,12 +4,15 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ScreenContainer } from "../src/components/layout/ScreenContainer";
 import { GameButton } from "../src/components/ui/GameButton";
+import { useDeviceProfile } from "../src/hooks/useDeviceProfile";
 import { fireHaptic } from "../src/services/haptics";
 import { useGameSettings } from "../src/store/game-settings";
 import { theme } from "../src/theme";
 
 export default function HomeScreen() {
+  const device = useDeviceProfile();
   const { settings } = useGameSettings();
+  const isWide = device.isLandscape || device.width >= 860;
 
   function goToGame() {
     void fireHaptic(settings.haptics, "confirm");
@@ -29,85 +32,110 @@ export default function HomeScreen() {
   }
 
   return (
-    <ScreenContainer scroll contentContainerStyle={styles.content}>
-      <View style={styles.heroCard}>
-        <Text style={styles.kicker}>Reusable Mobile Starter</Text>
-        <Text style={styles.title}>Ship-ready shell for touch-first games.</Text>
-        <Text style={styles.description}>
-          Includes safe-area aware layout, iOS-friendly navigation, orientation
-          locking, haptics hooks, pause flow, virtual joystick controls, and a
-          sample gameplay loop you can replace with your own game.
-        </Text>
+    <ScreenContainer
+      scroll
+      contentContainerStyle={[styles.content, isWide && styles.contentWide]}
+    >
+      <View style={[styles.topRow, isWide && styles.topRowWide]}>
+        <View style={[styles.heroCard, isWide && styles.splitPanel]}>
+          <Text style={styles.kicker}>Reusable Mobile Starter</Text>
+          <Text style={styles.title}>
+            Ship-ready shell for touch-first games.
+          </Text>
+          <Text style={styles.description}>
+            Includes safe-area aware layout, iOS-friendly navigation,
+            orientation locking, haptics hooks, pause flow, virtual joystick
+            controls, and a sample gameplay loop you can replace with your own
+            game.
+          </Text>
+        </View>
+
+        <View style={[styles.notesCard, isWide && styles.splitPanel]}>
+          <Text style={styles.notesTitle}>Template Intent</Text>
+          <Text style={styles.notesText}>
+            Replace the sample entities inside the game world layer, keep the
+            app shell intact, then brand, tune, test, and submit.
+          </Text>
+          <Pressable
+            onPress={goToGame}
+            style={({ pressed }) => [
+              styles.inlineAction,
+              pressed && styles.inlineActionPressed
+            ]}
+          >
+            <Text style={styles.inlineActionText}>Play sample now</Text>
+          </Pressable>
+        </View>
       </View>
 
-      <View style={styles.featureGrid}>
-        <FeatureChip
-          label="Safe Areas"
-          value="Top notch + home indicator aware"
-        />
-        <FeatureChip
-          label="Orientation"
-          value={
-            settings.orientation === "adaptive"
-              ? "Adaptive"
-              : settings.orientation === "portrait"
-                ? "Portrait"
-                : "Landscape"
-          }
-        />
-        <FeatureChip
-          label="Input"
-          value={
-            settings.handPreference === "left"
-              ? "Left-handed HUD"
-              : "Right-handed HUD"
-          }
-        />
-        <FeatureChip label="Feedback" value={`Haptics ${settings.haptics}`} />
-      </View>
+      <View style={[styles.bottomRow, isWide && styles.bottomRowWide]}>
+        <View style={[styles.featureGrid, isWide && styles.bottomPanel]}>
+          <FeatureChip
+            label="Safe Areas"
+            value="Top notch + home indicator aware"
+            wide={isWide}
+          />
+          <FeatureChip
+            label="Orientation"
+            value={
+              settings.orientation === "adaptive"
+                ? "Adaptive"
+                : settings.orientation === "portrait"
+                  ? "Portrait"
+                  : "Landscape"
+            }
+            wide={isWide}
+          />
+          <FeatureChip
+            label="Input"
+            value={
+              settings.handPreference === "left"
+                ? "Left-handed HUD"
+                : "Right-handed HUD"
+            }
+            wide={isWide}
+          />
+          <FeatureChip
+            label="Feedback"
+            value={`Haptics ${settings.haptics}`}
+            wide={isWide}
+          />
+        </View>
 
-      <View style={styles.buttonStack}>
-        <GameButton
-          label="Launch Demo Loop"
-          onPress={goToGame}
-          subtitle="Menu, HUD, pause, touch controls, collisions"
-          tone="primary"
-        />
-        <GameButton
-          label="Settings"
-          onPress={goToSettings}
-          subtitle="Rotation, handedness, haptics, keep awake"
-        />
-        <GameButton
-          label="How To Play"
-          onPress={goToHowToPlay}
-          subtitle="Template conventions and replacement points"
-        />
-      </View>
-
-      <View style={styles.notesCard}>
-        <Text style={styles.notesTitle}>Template Intent</Text>
-        <Text style={styles.notesText}>
-          Replace the sample entities inside the game world layer, keep the app
-          shell intact, then brand, tune, test, and submit.
-        </Text>
-        <Pressable
-          onPress={goToGame}
-          style={({ pressed }) => [
-            styles.inlineAction,
-            pressed && styles.inlineActionPressed
-          ]}
-        >
-          <Text style={styles.inlineActionText}>Play sample now</Text>
-        </Pressable>
+        <View style={[styles.buttonStack, isWide && styles.bottomPanel]}>
+          <GameButton
+            label="Launch Demo Loop"
+            onPress={goToGame}
+            subtitle="Menu, HUD, pause, touch controls, collisions"
+            tone="primary"
+          />
+          <GameButton
+            label="Settings"
+            onPress={goToSettings}
+            subtitle="Rotation, handedness, haptics, keep awake"
+          />
+          <GameButton
+            label="How To Play"
+            onPress={goToHowToPlay}
+            subtitle="Template conventions and replacement points"
+          />
+        </View>
       </View>
     </ScreenContainer>
   );
 }
 
-function FeatureChip({ label, value }: { label: string; value: string }) {
+function FeatureChip({
+  label,
+  value,
+  wide
+}: {
+  label: string;
+  value: string;
+  wide?: boolean;
+}) {
   return (
-    <View style={styles.featureChip}>
+    <View style={[styles.featureChip, wide && styles.featureChipWide]}>
       <Text style={styles.featureLabel}>{label}</Text>
       <Text style={styles.featureValue}>{value}</Text>
     </View>
@@ -117,9 +145,33 @@ function FeatureChip({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   content: {
     gap: theme.spacing.lg,
+    marginHorizontal: "auto",
+    maxWidth: 1180,
     paddingBottom: theme.spacing.xxxl,
     paddingHorizontal: theme.spacing.lg,
     paddingTop: theme.spacing.xl
+  },
+  contentWide: {
+    gap: theme.spacing.xl
+  },
+  topRow: {
+    gap: theme.spacing.lg
+  },
+  topRowWide: {
+    flexDirection: "row"
+  },
+  bottomRow: {
+    gap: theme.spacing.lg
+  },
+  bottomRowWide: {
+    alignItems: "flex-start",
+    flexDirection: "row"
+  },
+  splitPanel: {
+    flex: 1
+  },
+  bottomPanel: {
+    flex: 1
   },
   heroCard: {
     backgroundColor: theme.colors.card,
@@ -159,6 +211,9 @@ const styles = StyleSheet.create({
     gap: 6,
     minWidth: "47%",
     padding: theme.spacing.md
+  },
+  featureChipWide: {
+    minWidth: "31%"
   },
   featureLabel: {
     color: theme.colors.subtleText,
@@ -208,4 +263,3 @@ const styles = StyleSheet.create({
     fontSize: 14
   }
 });
-

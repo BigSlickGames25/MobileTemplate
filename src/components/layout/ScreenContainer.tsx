@@ -22,11 +22,14 @@ export function ScreenContainer({
   return (
     <View style={styles.root}>
       <AppBackdrop />
-      <SafeAreaView edges={["top", "bottom"]} style={styles.safeArea}>
+      <SafeAreaView
+        edges={["top", "bottom", "left", "right"]}
+        style={styles.safeArea}
+      >
         {scroll ? (
           <ScrollView
             bounces={false}
-            contentContainerStyle={contentContainerStyle}
+            contentContainerStyle={[styles.scrollContent, contentContainerStyle]}
             showsVerticalScrollIndicator={false}
           >
             {children}
@@ -46,6 +49,9 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1
+  },
+  scrollContent: {
+    flexGrow: 1
   },
   fill: {
     flex: 1
