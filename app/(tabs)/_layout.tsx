@@ -13,8 +13,8 @@ export default function TabsLayout() {
   const device = useDeviceProfile();
   const { settings } = useGameSettings();
   const isCompact = device.width < 390;
-  const tabBarBottomPadding = Math.max(insets.bottom, 12);
-  const tabBarHeight = (isCompact ? 78 : 82) + tabBarBottomPadding;
+  const tabBarBottomPadding = Math.max(insets.bottom, 10);
+  const tabBarHeight = (isCompact ? 68 : 72) + tabBarBottomPadding;
 
   return (
     <Tabs
@@ -39,7 +39,7 @@ export default function TabsLayout() {
           {
             height: tabBarHeight,
             paddingBottom: tabBarBottomPadding,
-            paddingTop: isCompact ? 6 : 8
+            paddingTop: isCompact ? 4 : 6
           }
         ]
       }}
@@ -115,13 +115,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.sm
   },
   tabBarIcon: {
-    marginBottom: 2,
-    marginTop: 2
+    marginBottom: 1,
+    marginTop: 1
   },
   tabBarItem: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 2
+    paddingVertical: 1
   },
   tabBarLabel: {
     fontFamily: theme.fonts.label,
