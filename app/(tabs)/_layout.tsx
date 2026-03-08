@@ -68,6 +68,24 @@ export default function TabsLayout() {
             void fireHaptic(settings.haptics, "tap");
           }
         }}
+        name="hub"
+        options={{
+          title: "Hub",
+          tabBarIcon: ({ color, focused }) => (
+            <MaterialCommunityIcons
+              color={color}
+              name={focused ? "account-network" : "account-network-outline"}
+              size={focused ? 24 : 22}
+            />
+          )
+        }}
+      />
+      <Tabs.Screen
+        listeners={{
+          tabPress: () => {
+            void fireHaptic(settings.haptics, "tap");
+          }
+        }}
         name="settings"
         options={{
           title: "Settings",

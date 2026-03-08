@@ -3,11 +3,13 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { theme } from "../../theme";
 
 export function GameButton({
+  disabled = false,
   label,
   onPress,
   subtitle,
   tone = "secondary"
 }: {
+  disabled?: boolean;
   label: string;
   onPress: () => void;
   subtitle?: string;
@@ -15,11 +17,14 @@ export function GameButton({
 }) {
   return (
     <Pressable
+      disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
         tone === "primary" ? styles.primary : styles.secondary,
+        disabled && styles.disabled,
         pressed &&
+          !disabled &&
           (tone === "primary" ? styles.primaryPressed : styles.secondaryPressed)
       ]}
     >
@@ -52,6 +57,9 @@ const styles = StyleSheet.create({
   },
   secondaryPressed: {
     backgroundColor: theme.colors.cardMuted
+  },
+  disabled: {
+    opacity: 0.5
   },
   copy: {
     gap: 6

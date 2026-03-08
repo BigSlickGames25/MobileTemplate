@@ -4,7 +4,10 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ScreenContainer } from "../components/layout/ScreenContainer";
 import { GameButton } from "../components/ui/GameButton";
+import { runtimeConfig } from "../config/runtime";
 import { useDeviceProfile } from "../hooks/useDeviceProfile";
+import { coreHubCapabilities, hubProducts } from "../platform/catalog/products";
+import { useHubSession } from "../platform/auth/session";
 import { fireHaptic } from "../services/haptics";
 import { useGameSettings } from "../store/game-settings";
 import { clamp, theme } from "../theme";
@@ -12,15 +15,33 @@ import { clamp, theme } from "../theme";
 export function HomeScreen() {
   const device = useDeviceProfile();
   const { settings } = useGameSettings();
+  const { currentProduct, hasToken, profile, status } = useHubSession();
   const isWide = device.isLandscape || device.width >= 860;
   const isCompact = device.width < 390;
   const titleFontSize = Math.round(clamp(34 * device.textScale, 28, 38));
+  const sessionLabel = profile?.sUserName
+    ? `${profile.sUserName}${typeof profile.nChips === "number" ? ` • ${profile.nChips} chips` : ""}`
+    : status === "guest"
+      ? "Guest session bootstrap ready"
+      : hasToken
+        ? "Stored hub token"
+        : "No session yet";
 
   function goToGame() {
     void fireHaptic(settings.haptics, "confirm");
     startTransition(() => {
       router.push("/game" as Href);
     });
+  }
+
+  function goToLauncher() {
+    void fireHaptic(settings.haptics, "tap");
+    router.navigate("/launcher" as Href);
+  }
+
+  function goToHub() {
+    void fireHaptic(settings.haptics, "tap");
+    router.navigate("/hub" as Href);
   }
 
   function goToSettings() {
@@ -73,10 +94,19 @@ export function HomeScreen() {
             isCompact && styles.compactCard
           ]}
         >
-          <Text style={styles.notesTitle}>Template Intent</Text>
+          <Text style={styles.notesTitle}>Hub-Ready Starter</Text>
           <Text style={styles.notesText}>
-            Replace the sample entities inside the game world layer, keep the
-            app shell intact, then brand, tune, test, and submit.
+            This template now includes a shared platform layer for auth,
+            profile, chips, rewards, transactions, and analytics. Game-specific
+            features like poker tables, realtime combat, or other gameplay
+            systems should sit on top as optional modules, not as platform
+            assumptions.
+          </Text>
+          <Text style={styles.notesMeta}>
+            Active product: {currentProduct.title}
+          </Text>
+          <Text style={styles.notesMeta}>
+            Shared catalog: {hubProducts.length} products
           </Text>
           <Pressable
             onPress={goToGame}
@@ -126,24 +156,52 @@ export function HomeScreen() {
             value={`Haptics ${settings.haptics}`}
             wide={isWide}
           />
+          <FeatureChip
+            compact={isCompact}
+            label="Backend"
+            value={runtimeConfig.backendLabel}
+            wide={isWide}
+          />
+          <FeatureChip
+            compact={isCompact}
+            label="Session"
+            value={sessionLabel}
+            wide={isWide}
+          />
+          <FeatureChip
+            compact={isCompact}
+            label="Core"
+            value={`${coreHubCapabilities.length} shared services`}
+            wide={isWide}
+          />
         </View>
 
         <View style={[styles.buttonStack, isWide && styles.bottomPanel]}>
           <GameButton
+            label="Launcher"
+            onPress={goToLauncher}
+            subtitle="Choose the active game or app identity for this build"
+            tone="primary"
+          />
+          <GameButton
+            label="Hub Console"
+            onPress={goToHub}
+            subtitle="Open auth, profile, wallet, and rewards routes"
+          />
+          <GameButton
             label="Launch Demo Loop"
             onPress={goToGame}
-            subtitle="Menu, HUD, pause, touch controls, collisions"
-            tone="primary"
+            subtitle="Keep the shell, replace gameplay, preserve the hub connection"
           />
           <GameButton
             label="Settings"
             onPress={goToSettings}
-            subtitle="Rotation, handedness, haptics, keep awake"
+            subtitle="Local device settings today, backend player settings next"
           />
           <GameButton
             label="How To Play"
             onPress={goToHowToPlay}
-            subtitle="Template conventions and replacement points"
+            subtitle="Platform architecture, replacement points, and deployment flow"
           />
         </View>
       </View>
@@ -289,6 +347,12 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.body,
     fontSize: 15,
     lineHeight: 23
+  },
+  notesMeta: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 13,
+    letterSpacing: 0.3
   },
   inlineAction: {
     alignSelf: "flex-start",

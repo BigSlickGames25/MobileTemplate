@@ -15,6 +15,9 @@ coverage
 *.err.log
 android
 ios
+.env
+.env.*
+!.env.example
 
 
 # @generated expo-cli sync-2b81b286409207a5da26e14c78851eb30d8ccbdb

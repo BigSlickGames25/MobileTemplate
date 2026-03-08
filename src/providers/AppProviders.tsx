@@ -6,6 +6,7 @@ import {
   GameSettingsProvider,
   useGameSettings
 } from "../store/game-settings";
+import { HubSessionProvider, useHubSession } from "../platform/auth/session";
 import { theme } from "../theme";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
@@ -13,7 +14,9 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <GameSettingsProvider>
-          <BootstrapGate>{children}</BootstrapGate>
+          <HubSessionProvider>
+            <BootstrapGate>{children}</BootstrapGate>
+          </HubSessionProvider>
         </GameSettingsProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
@@ -22,15 +25,16 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
 function BootstrapGate({ children }: { children: React.ReactNode }) {
   const { isReady } = useGameSettings();
+  const { isReady: isHubReady } = useHubSession();
 
-  if (isReady) {
+  if (isReady && isHubReady) {
     return <>{children}</>;
   }
 
   return (
     <View style={styles.loadingScreen}>
       <ActivityIndicator color={theme.colors.accent} size="large" />
-      <Text style={styles.loadingText}>Loading mobile runtime...</Text>
+      <Text style={styles.loadingText}>Loading platform runtime...</Text>
     </View>
   );
 }
@@ -52,4 +56,3 @@ const styles = StyleSheet.create({
     fontSize: 16
   }
 });
-

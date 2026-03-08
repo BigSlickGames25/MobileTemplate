@@ -27,13 +27,19 @@ export function HowToPlayScreen() {
         wide={isWide}
       />
       <InfoCard
+        body="Shared hub integration now lives in src/platform. That layer wraps auth, profile, wallet, transactions, rewards, analytics, and session bootstrap. Game-specific adapters such as poker tables should remain optional add-ons."
+        compact={isCompact}
+        title="Hub layer"
+        wide={isWide}
+      />
+      <InfoCard
         body="Safe areas, modal navigation, screen orientation control, and haptic feedback are already wired. The template assumes full-screen gameplay on iPad to keep orientation locking reliable."
         compact={isCompact}
         title="iOS behavior"
         wide={isWide}
       />
       <InfoCard
-        body="Brand the app config, replace icon and splash assets, add your audio/game art, test on physical devices, and run an EAS production build."
+        body="Brand the app config, replace icon and splash assets, add your audio and game art, point the env at the correct hub backend, test on physical devices, and export web separately to S3 and CloudFront."
         compact={isCompact}
         title="Before shipping"
         wide={isWide}

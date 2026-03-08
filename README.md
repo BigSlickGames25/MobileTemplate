@@ -29,8 +29,24 @@ A reusable Expo/React Native starter for shipping mobile-first games with a work
 - `app/`: navigation routes and screen entry points.
 - `src/components/`: reusable shell, UI, and touch controls.
 - `src/game/`: sample world state, update loop, and game rendering.
+- `src/platform/`: shared hub integration for auth, profile, wallet, rewards, product catalog, and optional game adapters.
 - `src/services/`: device services such as haptics and orientation.
 - `src/store/`: persisted runtime settings.
+
+## Platform starter
+
+This repo is being structured as a reusable client starter for a shared hub backend, not just a one-off game.
+
+Shared platform responsibilities now include:
+
+- auth and session bootstrap
+- persisted hub token handling
+- profile and player settings endpoints
+- chips, transactions, and daily rewards endpoints
+- optional game adapters such as poker tables or other realtime modes
+- product catalog metadata for multiple games/apps
+
+See `docs/platform-template-architecture.md` for the current shared-platform shape.
 
 ## Run it
 
@@ -48,23 +64,41 @@ npx expo prebuild
 npx expo run:ios
 ```
 
-## Deploy to Netlify
+## Frontend env
 
-1. Push this folder to a GitHub repository.
-2. In Netlify, choose `Add new site` -> `Import an existing project`.
-3. Select the GitHub repo that contains this project.
-4. Keep the Netlify defaults from `netlify.toml`:
-   Build command: `npm run netlify-build`
-   Publish directory: `web-build`
-5. Deploy the site.
+Copy `.env.example` to `.env` and point the frontend at the EC2 API:
 
-If you want to test the Netlify build locally first:
+```bash
+cp .env.example .env
+```
+
+Set:
+
+- `EXPO_PUBLIC_APP_ENV=staging`
+- `EXPO_PUBLIC_API_BASE_URL=https://staging.21-holdem.com`
+- `EXPO_PUBLIC_SOCKET_BASE_URL=wss://staging.21-holdem.com`
+
+## Deploy web to S3 + CloudFront
+
+This frontend should be built locally or in CI and deployed as static files. Do not install or build the React toolchain on the `t2.micro` backend box.
+
+Create the static export:
 
 ```bash
 npm run export:web
 ```
 
-That generates the static site in `web-build/`.
+That generates the site in `web-build/`.
+
+Deployment steps:
+
+1. Upload `web-build/` to an S3 bucket that is dedicated to the web app.
+2. Put CloudFront in front of that bucket.
+3. Attach the rewrite function in `infra/cloudfront/viewer-request-rewrite.js` so extensionless Expo routes like `/settings` resolve to `/settings.html`.
+4. Point your frontend domain at CloudFront.
+5. Keep the API on EC2 behind `https://staging.21-holdem.com`.
+
+Detailed AWS notes live in `docs/deploy-web-aws.md`.
 
 ## GitHub quick start
 
@@ -83,7 +117,8 @@ git push -u origin main
 2. Replace the temporary UI copy in `app/index.tsx`, `app/settings.tsx`, and `app/how-to-play.tsx`.
 3. Add your real app icon, splash art, fonts, sounds, and branding.
 4. Update `app.config.ts` bundle identifiers, app name, slug, and scheme.
-5. Add analytics, saves, backend, and monetization only after the core loop is stable.
+5. Replace `.env.example` values with your real API, socket, and environment settings.
+6. Add analytics, saves, backend, and monetization only after the core loop is stable.
 
 ## Shipping checklist
 
@@ -99,4 +134,5 @@ git push -u origin main
 - `ios.requireFullScreen` is enabled so orientation locking remains reliable on iPad.
 - The sample loop is intentionally simple. The template value is the mobile shell around it.
 - If dependency versions drift, run `npx expo install --fix` to align with the current SDK.
-- Netlify is for the web build only. Native features like haptics and device rotation behavior still need testing on a real iPhone or iPad.
+- The recommended web topology is `CloudFront -> S3` for the frontend and `Nginx -> PM2 Node -> MongoDB/Redis` for the backend.
+- Native features like haptics and device rotation behavior still need testing on a real iPhone or iPad.
